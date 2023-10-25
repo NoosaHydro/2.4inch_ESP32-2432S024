@@ -24,7 +24,7 @@
 // 1. OTA (over the air programming), and
 // 2. the LED flashes, and
 // 3. demo of backlight dimming - CAUTION - this blocks the radio working.
-// 4. show light sensor data
+// 4. show light sensor data - NOTE - does not appear to work; might be wired wrong?
 
 // #define USE_BACKLIGHT_PWM 1 //  CAUTION - this blocks the radio working.
 
@@ -292,18 +292,18 @@ void test_adc() {
       if(digitalPinToAnalogChannel(i) >= 0) {
         Serial.printf("pin(%d)=%u ", i, analogRead(i));
       }
+    }          
       Serial.println();
       delay(1000);
-    }          
   }
-} // delay_ota
+} 
 
 
 void setup()
 {
     //Serial.begin(115200); /*初始化串口*/
     SerialIDshow(115200); // starts Serial and shows build info.
-    test_adc();
+    //test_adc();
     setup_ota();
 
     String LVGL_Arduino = "Hello Arduino! ";
@@ -434,3 +434,4 @@ void loop()
 #endif       
     }
 }
+
