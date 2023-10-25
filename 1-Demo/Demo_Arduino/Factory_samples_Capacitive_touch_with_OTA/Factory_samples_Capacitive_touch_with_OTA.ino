@@ -1,6 +1,8 @@
 // Works! Use board "ESP32 Dev Module" - see https://github.com/NoosaHydro/2.4inch_ESP32-2432S024, and a USB Serial device on the power header.  This is for the ESP32 2.4inch touch display board.
 
-// Muse be DIO flash mode, 4mb, core 1 and events 1, "Minimal SPIFFS (1.9MB APP with OTA/190KB SPIFFS)"
+// NOTE!! *Must* be esp32 board version 2.0.14 - DO NOT USE 3.0.alpha2 (gives GPIO errors)
+
+// Must be DIO flash mode, 4mb, core 1 and events 1, "Minimal SPIFFS (1.9MB APP with OTA/190KB SPIFFS)"
 // You must flash this the first time using Serial, before you can use OTA.
 // You need to copy User_Setup.h into your Arduino/libraries/TFT_eSPI folder for this to work, *, and
 // You also need to copy the lv_conf.h file into your Arduino/libraries folder for this to work *
@@ -18,7 +20,13 @@
  *  
 */
 
-// This is the same program as the 2.4inch_ESP32-2432S024 ships with, excelt with the attition of OTA (over the air programming), and the LED flashes
+// This is the same program as the 2.4inch_ESP32-2432S024 ships with, excelt with the attition of:-
+// 1. OTA (over the air programming), and
+// 2. the LED flashes, and
+// 3. demo of backlight dimming - CAUTION - this blocks the radio working.
+// 4. show light sensor data
+
+// #define USE_BACKLIGHT_PWM 1 //  CAUTION - this blocks the radio working.
 
 //#define LV_CONF_PATH "./here/"
 //#define LV_CONF_INCLUDE_SIMPLE
@@ -40,12 +48,20 @@ const char* ssid = WIFI_SSID;
 const char* password = WIFI_PASSWORD;
 
 #include <SerialID.h>  // So we know what code and version is running inside our MCUs - see https://github.com/gitcnd/SerialID
-SerialIDset("\n#\tv1.01f-" __FILE__ "\t" __DATE__ "_" __TIME__ " using " WIFI_SSID);
-const char* hname = "ESP32-LCD-01f";
+#include "myenv.h" // see recipe.hooks.prebuild.0.pattern=\arduino_prebuild.bat in C:\Users\cnd\AppData\Local\Arduino15\packages\esp32\hardware\esp32\3.0.0-alpha2\platform.txt
+SerialIDset("\n#\tv1.02j-" __FILE__ "\t" __DATE__ "_" __TIME__ " using " WIFI_SSID " by " ENV_USERNAME " on " ENV_COMPUTERNAME );
+const char* hname = "ESP32-LCD-01j";
 
 /*更改屏幕分辨率*/
 static const uint16_t screenWidth = 240;
 static const uint16_t screenHeight = 320;
+
+// backlight led dimming settings for ledcAttachPin
+int freq = 2000;    // frequency
+int channel = 0;    // aisle
+int resolution = 8;   // Resolution
+#define BACKLIGHT_PIN 27
+#define LIGHT_SENSOR_PIN 34
 
 /*定义触摸屏引脚*/
 #define I2C_SDA 33
@@ -267,10 +283,27 @@ void delay_ota(int dly) {
   delay(dly);
 } // delay_ota
 
+void test_adc() {
+  for (int i=0; i<40; i++) {  Serial.println("D pin to A chan: " + String(i) + "=" + String(digitalPinToAnalogChannel(i)));  }  
+  
+  for (int j=0; j<10; j++) {  
+    Serial.println();
+    for (int i=0; i<40; i++) {  
+      if(digitalPinToAnalogChannel(i) >= 0) {
+        Serial.printf("pin(%d)=%u ", i, analogRead(i));
+      }
+      Serial.println();
+      delay(1000);
+    }          
+  }
+} // delay_ota
+
+
 void setup()
 {
     //Serial.begin(115200); /*初始化串口*/
     SerialIDshow(115200); // starts Serial and shows build info.
+    test_adc();
     setup_ota();
 
     String LVGL_Arduino = "Hello Arduino! ";
@@ -293,14 +326,14 @@ void setup()
 #if LV_USE_LOG != 0
     lv_log_register_print_cb(my_print); /* 用于调试的注册打印功能 */
 #endif
-    pinMode(27, OUTPUT);
-    digitalWrite(27, LOW);
+    pinMode(BACKLIGHT_PIN, OUTPUT);
+    digitalWrite(BACKLIGHT_PIN, LOW);
     tft.begin();        /*初始化*/
     tft.setRotation(0); /* 旋转 */
     tft.initDMA();      /* 初始化DMA */
 
     touch.begin(); /*初始化触摸板*/
-    digitalWrite(27, HIGH);
+    digitalWrite(BACKLIGHT_PIN, HIGH);
     tft.fillScreen(TFT_RED);      digitalWrite(4, 0);  digitalWrite(16, 1); digitalWrite(17, 1); // red LED too!
     delay_ota(500);
     tft.fillScreen(TFT_GREEN);    digitalWrite(4, 1);  digitalWrite(16, 0); digitalWrite(17, 1); // green LED too!
@@ -354,9 +387,36 @@ void setup()
     //  lv_demo_printer();
     //  lv_demo_stress();             // seems to be OK
 #endif
+
+#ifdef USE_BACKLIGHT_PWM
+    ledcSetup(channel, freq, resolution); // set channel
+#endif    
+   // pinMode(LIGHT_SENSOR_PIN,INPUT);
+   //pinMode(LIGHT_SENSOR_PIN, INPUT_ANALOG);
+
+    
+
     Serial.println("Setup done");
     tft.startWrite();
 }
+
+void dim_bl() {
+  ledcAttachPin(BACKLIGHT_PIN, channel);
+
+  // gradually darken
+  for (int dutyCycle = 0; dutyCycle <= 255; dutyCycle = dutyCycle + 5)
+  {
+    ledcWrite(channel, dutyCycle);  // output PWM
+    delay_ota(100);
+  }
+
+  // gradually brighten
+   for (int dutyCycle = 255; dutyCycle >= 0; dutyCycle = dutyCycle - 5)
+  {
+    ledcWrite(channel, dutyCycle);  // output PWM
+    delay_ota(100);
+  }  
+} // dim_bl
 
 int ctr=0; int loopr=0;
 void loop()
@@ -365,9 +425,12 @@ void loop()
     delay_ota(5);
     if(ctr++>200) {
       ctr=0; loopr++;
-      Serial.print("hi "); Serial.println(loopr);
+      Serial.print("hi "); Serial.println(analogRead(LIGHT_SENSOR_PIN)); //Serial.println(loopr);
       digitalWrite(4, loopr&1); // Red
       digitalWrite(16, loopr&2);  // Green
-      digitalWrite(17, loopr&4);  // Blue      
+      digitalWrite(17, loopr&4);  // Blue    
+#ifdef USE_BACKLIGHT_PWM
+      dim_bl(); // blocks wifi ?
+#endif       
     }
 }
