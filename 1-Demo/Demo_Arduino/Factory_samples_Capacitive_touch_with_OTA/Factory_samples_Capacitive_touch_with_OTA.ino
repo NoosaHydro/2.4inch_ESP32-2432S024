@@ -1,4 +1,5 @@
 // Works! Use board "ESP32 Dev Module" - see https://github.com/NoosaHydro/2.4inch_ESP32-2432S024, and a USB Serial device on the power header.  This is for the ESP32 2.4inch touch display board.
+// To support OTA programming from Aruino, use the partition scheme that has "with OTA"
 
 // NOTE!! *Must* be esp32 board version 2.0.14 - DO NOT USE 3.0.alpha2 (gives GPIO errors)
 
@@ -24,9 +25,12 @@
 // 1. OTA (over the air programming), and
 // 2. the LED flashes, and
 // 3. demo of backlight dimming - CAUTION - this blocks the radio working.
-// 4. show light sensor data - NOTE - does not appear to work; might be wired wrong?
+// 4. show light sensor data - NOTE - highly oversensitive - reads 0 in most light conditions (put a dark filter over it to use in normal light)
+// 5. play sounds on the (not included) speaker (plug into SPK socket)
 
 // #define USE_BACKLIGHT_PWM 1 //  CAUTION - this blocks the radio working.
+
+#define USE_SOUND 1 // play beeps out of GPIO26 (speaker pin)
 
 //#define LV_CONF_PATH "./here/"
 //#define LV_CONF_INCLUDE_SIMPLE
@@ -48,9 +52,18 @@ const char* ssid = WIFI_SSID;
 const char* password = WIFI_PASSWORD;
 
 #include <SerialID.h>  // So we know what code and version is running inside our MCUs - see https://github.com/gitcnd/SerialID
-#include "myenv.h" // see recipe.hooks.prebuild.0.pattern=\arduino_prebuild.bat in C:\Users\cnd\AppData\Local\Arduino15\packages\esp32\hardware\esp32\3.0.0-alpha2\platform.txt
-SerialIDset("\n#\tv1.02j-" __FILE__ "\t" __DATE__ "_" __TIME__ " using " WIFI_SSID " by " ENV_USERNAME " on " ENV_COMPUTERNAME );
-const char* hname = "ESP32-LCD-01j";
+//#include "myenv.h" // see recipe.hooks.prebuild.0.pattern=\arduino_prebuild.bat in C:\Users\cnd\AppData\Local\Arduino15\packages\esp32\hardware\esp32\3.0.0-alpha2\platform.txt
+SerialIDset("\n#\tv1.03j-" __FILE__ "\t" __DATE__ "_" __TIME__ " using " WIFI_SSID );
+
+
+//SerialIDset("\n#\tv1." MYVER "-" MYCHIP "-" __FILE__ " " QUOTE(ENV_USERNAME) "@" QUOTE(ENV_COMPUTERNAME) "\t" __DATE__ "_" __TIME__);
+//SerialIDset("\n#\tv1.03j" MYVER "-" MYCHIP "-" __FILE__ " " SERIALID_TAG " using " WIFI_SSID); // TAG is __DATE__ "_" __TIME__ " " ENV_QUOTE(ENV_USERNAME) "@" ENV_QUOTE(ENV_COMPUTERNAME)
+//SerialIDset("\n#\tv1.03j-"  __FILE__ " " SERIALID_TAG " using " WIFI_SSID); // TAG is __DATE__ "_" __TIME__ " " ENV_QUOTE(ENV_USERNAME) "@" ENV_QUOTE(ENV_COMPUTERNAME)
+
+//#include "myenv.h" // see recipe.hooks.prebuild.0.pattern=\arduino_prebuild.bat in C:\Users\cnd\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.14\platform.txt
+//SerialIDset("\n#\tv1.08-" __FILE__ "\t" __DATE__ "_" __TIME__ " "  ENV_USERNAME "@" ENV_COMPUTERNAME  " on " WIFI_SSID);
+
+const char* hname = "ESP32-LCD-03j";
 
 /*更改屏幕分辨率*/
 static const uint16_t screenWidth = 240;
@@ -62,6 +75,10 @@ int channel = 0;    // aisle
 int resolution = 8;   // Resolution
 #define BACKLIGHT_PIN 27
 #define LIGHT_SENSOR_PIN 34
+#define SPEAKER_PIN 26
+int sfreq = 5000;    // frequency
+int schannel = 0;    // aisle
+int sresolution = 8;   // Resolution
 
 /*定义触摸屏引脚*/
 #define I2C_SDA 33
@@ -388,6 +405,9 @@ void setup()
     //  lv_demo_stress();             // seems to be OK
 #endif
 
+#ifdef USE_SOUND
+    ledcSetup(schannel, sfreq, sresolution); // set channel
+#endif    
 #ifdef USE_BACKLIGHT_PWM
     ledcSetup(channel, freq, resolution); // set channel
 #endif    
@@ -425,13 +445,16 @@ void loop()
     delay_ota(5);
     if(ctr++>200) {
       ctr=0; loopr++;
-      Serial.print("hi "); Serial.println(analogRead(LIGHT_SENSOR_PIN)); //Serial.println(loopr);
+      Serial.print("light sensor GPIO" ENV_QUOTE(LIGHT_SENSOR_PIN) " ADC="); Serial.println(analogRead(LIGHT_SENSOR_PIN)); //Serial.println(loopr);
       digitalWrite(4, loopr&1); // Red
       digitalWrite(16, loopr&2);  // Green
       digitalWrite(17, loopr&4);  // Blue    
 #ifdef USE_BACKLIGHT_PWM
       dim_bl(); // blocks wifi ?
 #endif       
+#ifdef USE_SOUND
+      ledcAttachPin(SPEAKER_PIN, schannel);
+      ledcWrite(schannel, 128 * (loopr & 1) );  // output PWM
+#endif
     }
 }
-
