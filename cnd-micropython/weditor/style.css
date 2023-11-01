@@ -1,0 +1,74 @@
+
+body {
+    overflow: auto;
+    margin: 0;
+    height: 100vh;
+    background-color: black;
+}
+
+#editor {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    background-color: black;
+}
+#left {
+    position: relative; 
+    width: 10%; 
+    height: 100%; 
+    float: left; 
+    overflow: auto; 
+    user-select: none; 
+    background-color: black; 
+    color: white;
+}
+#notification {
+    position: absolute;
+    bottom: 10px;
+    width: 50%;
+    padding: 10px;
+    margin: 0 auto;
+    right: 0;
+    left: 0;
+    text-align: center;
+    border-radius: 5px;
+    background-color: rgb(30,25,25);
+    color: white;
+}
+#term {
+    position: relative; width: 30%; height: 100%; float: left; background-color: black;
+}
+
+.left_title {
+    position: relative;
+    float: left;
+    text-align: center;
+    width: 100%;
+    margin-top: 10px;
+}
+.left_element {
+    position: relative;
+    width: calc(100% - 20px - 2px - 10px);
+    margin: 5px 5px 0px 5px;
+    padding: 10px;
+    float: left;
+    border-radius: 5px;
+    color: white;
+}
+.left_element:hover {
+    background-color: rgb(45,45,45);
+}
+.left_action {
+    text-align: center;
+    background-color: rgb(25,35,25);
+}
+.left_file {
+    background-color: rgb(25,25,25);
+}
+.left_dir {
+    background-color: rgb(35,25,25);
+}
+.eholder {
+    position: relative; width: 60%; height: 100%; float: left; background-color: black;
+}
+

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>MicroPython Editor</title>
+        <script src="js/term.min.js.gz"></script>
+        <link rel="stylesheet" href="style.css"/>
+        <style type="text/css" media="screen">
+        </style>
+        <script type="text/javascript" src="js/script.js.gz"></script>
+        <!--script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.11.2/ace.js" type="text/javascript" charset="utf-8"></script-->
+        <script src="js/ace.js.gz" type="text/javascript" charset="utf-8"></script>
+    </head>
+    <body onkeydown="return handleKeyDown(event);">
+        <div id="left">
+            LOADING FILES
+        </div>
+        <div class="eholder">
+            <pre id="editor">LOADING EDITOR</pre>
+        </div>
+        <div id="term"></div>
+        <div id="notification"></div>
+
+        <script src="js/webrepl.min.js.gz"></script>
+        <script>
+            initEditor();
+        </script>
+    </body>
+</html>
+

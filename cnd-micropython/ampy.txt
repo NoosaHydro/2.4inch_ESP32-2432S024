@@ -1,0 +1,4 @@
+ampy --port /dev/ttyS16 ls
+
+perl -e  'use strict;my $cmd="ampy --port /dev/ttyS16 ls "; my $f=""; &show($f); sub show{my @r;my $f=shift; my @f=`$cmd $f`; chomp @f; foreach(@f){print "$_\n"; push @r,$_ unless(/\./);} foreach(@r){print "\n"; &show("$_")}}' | perl -ne 'print ".$_"'>out
+
