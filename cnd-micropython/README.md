@@ -4,7 +4,7 @@ Follow these instructions:-
 
 ## Prerequisites
 
-* python
+* python:
   might be best not to use the store version (puts files in weird places): use: [https://www.python.org/downloads/windows/](https://www.python.org/downloads/windows/)
 * ampy
 `  pip install adafruit-ampy`
@@ -49,4 +49,6 @@ Start the POSIX shell (see above) then:
     run main.py
 
 
-![working example](https://raw.githubusercontent.com/NoosaHydro/2.4inch_ESP32-2432S024/cnd-micropython/demo_image.jpg)
+### Working example:-
+
+![working example](https://raw.githubusercontent.com/NoosaHydro/2.4inch_ESP32-2432S024/main/cnd-micropython/demo_image.jpg)
