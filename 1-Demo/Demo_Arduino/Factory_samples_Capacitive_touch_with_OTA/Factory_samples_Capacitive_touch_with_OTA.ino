@@ -53,12 +53,12 @@ const char* password = WIFI_PASSWORD;
 
 #include <SerialID.h>  // So we know what code and version is running inside our MCUs - see https://github.com/gitcnd/SerialID
 //#include "myenv.h" // see recipe.hooks.prebuild.0.pattern=\arduino_prebuild.bat in C:\Users\cnd\AppData\Local\Arduino15\packages\esp32\hardware\esp32\3.0.0-alpha2\platform.txt
-SerialIDset("\n#\tv1.03j-" __FILE__ "\t" __DATE__ "_" __TIME__ " using " WIFI_SSID );
+//SerialIDset("\n#\tv1.03j-" __FILE__ "\t" __DATE__ "_" __TIME__ " using " WIFI_SSID " by " ENV_USERNAME " on " ENV_COMPUTERNAME );
 
 
 //SerialIDset("\n#\tv1." MYVER "-" MYCHIP "-" __FILE__ " " QUOTE(ENV_USERNAME) "@" QUOTE(ENV_COMPUTERNAME) "\t" __DATE__ "_" __TIME__);
 //SerialIDset("\n#\tv1.03j" MYVER "-" MYCHIP "-" __FILE__ " " SERIALID_TAG " using " WIFI_SSID); // TAG is __DATE__ "_" __TIME__ " " ENV_QUOTE(ENV_USERNAME) "@" ENV_QUOTE(ENV_COMPUTERNAME)
-//SerialIDset("\n#\tv1.03j-"  __FILE__ " " SERIALID_TAG " using " WIFI_SSID); // TAG is __DATE__ "_" __TIME__ " " ENV_QUOTE(ENV_USERNAME) "@" ENV_QUOTE(ENV_COMPUTERNAME)
+SerialIDset("\n#\tv1.03j-"  __FILE__ " " SERIALID_TAG " using " WIFI_SSID);  // TAG is __DATE__ "_" __TIME__ " " ENV_QUOTE(ENV_USERNAME) "@" ENV_QUOTE(ENV_COMPUTERNAME)
 
 //#include "myenv.h" // see recipe.hooks.prebuild.0.pattern=\arduino_prebuild.bat in C:\Users\cnd\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.14\platform.txt
 //SerialIDset("\n#\tv1.08-" __FILE__ "\t" __DATE__ "_" __TIME__ " "  ENV_USERNAME "@" ENV_COMPUTERNAME  " on " WIFI_SSID);
