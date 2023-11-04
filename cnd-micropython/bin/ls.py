@@ -20,22 +20,30 @@ def __main__(args):
 
 	items = [pt for pt in os.ilistdir(path)]
 	for pt in sorted(items):
+		#print(pt)	# ('notify.py', 32768, 0, 4604)
 		f = pt[0]
 		type = pt[1]
 		inode = pt[2]
-		fsize = None
-		if len(pt) > 3:
-			fsize = pt[3]
+		#fsize = None
+		fsize = 0
+		if len(pt) > 4:
+			fsize = pt[4]
 		
-		type = "f" if type == 32768 else "d"
-		if fsize is None:
-			type = "M"
-		size = 0
-		if type == "f":
-#			print ("opening {}".format(path_pre + f))
-			o = open(path_pre + f, "rb")
-			size = human(o.seek(10000000))
-			o.close()
-		print ("{} {}	{}".format(type, size, f))
+		tag = "" if type == 32768 else "/"
+		print ("{}\t{}{}".format(pt[3], f,tag))
+
+		if 0:
+
+			type = "f" if type == 32768 else "d"
+			if fsize is None:
+				type = "M"
+			size = 0
+			if type == "f":
+				#print ("opening {}".format(path_pre + f))
+				o = open(path_pre + f, "rb")
+				size = human(o.seek(10000000))
+				o.close()
+			print ("{} {}	{}".format(type, size, f))
+
 
 
